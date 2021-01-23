@@ -116,11 +116,18 @@ class laurel_mesh:
         self.devices = []
         self.link = None
 
-    def connect(self):
+    def connect(self, idx_start=0):
         if self.link != None:
             return
 
-        for device in self.devices:
+        # Change order of connection attempts
+        dev_list = [self.devices[idx_start]]
+        for idx in range(len(self.devices)):
+            if idx != idx_start:
+                dev_list.append(self.devices[idx])
+
+        # Try to connect
+        for device in dev_list:
             # Try each device in turn - we only need to connect to one to be
             # on the mesh
             try:                
@@ -133,7 +140,8 @@ class laurel_mesh:
                 pass
         if self.link is None:
             raise Exception("Unable to connect to mesh %s" % self.address)
-
+        else:
+            print('Connected to mesh %s' % self.address)
     def send_packet(self, id, command, params):
         if self.link is None:
             self.connect()
