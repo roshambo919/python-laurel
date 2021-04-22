@@ -104,7 +104,7 @@ class laurel:
                 mac = "%s:%s:%s:%s:%s:%s" % (mac[5], mac[4], mac[3], mac[2], mac[1], mac[0])
                 if network is None:
                     network = laurel_mesh(mesh['mac'], mesh['access_key'])
-                device = laurel_device(network, {'name': bulb['displayName'], 'mac': mac, 'id': id, 'type': bulb['deviceType']})
+                device = laurel_device(network, {'name': bulb['displayName'], 'mac': mac, 'id': id, 'type': bulb['deviceType'], 'load': bulb['loadSelection'})
                 network.devices.append(device)
                 self.devices.append(device)
                 
@@ -149,6 +149,7 @@ class laurel_device:
         self.id = device['id']
         self.mac = device['mac']
         self.type = device['type']
+        self.load = device['load']
         self.callback = None
         self.brightness = 0
         self.temperature = 0
@@ -181,14 +182,40 @@ class laurel_device:
     def update_status(self):
         self.network.send_packet(self.id, 0xda, [])
 
+    def supports_dimming(self):
+        if self.supports_temperature() or \
+           self.type == 1 or \
+           self.type == 9 or \
+           self.type == 17 or \
+           self.type == 18 or \
+           self.type == 24 or \
+           self.type == 81:
+            return True
+
+        if self.type == 48 or \
+           self.type == 55 or \
+           self.type == 56:
+            # Switch, depends on load type
+            if self.load == 4 or\
+               self.load == 5:
+                return False
+            return True
+
+        return False
+
     def supports_temperature(self):
         if self.supports_rgb() or \
            self.type == 5 or \
+           self.type == 14 or \
+           self.type == 15 or \
            self.type == 19 or \
            self.type == 20 or \
+           self.type == 28 or \
+           self.type == 29 or \
            self.type == 80 or \
            self.type == 83 or \
-           self.type == 85:
+           self.type == 85 or \
+           self.type == 129:
             return True
         return False
 
@@ -198,6 +225,15 @@ class laurel_device:
            self.type == 8 or \
            self.type == 21 or \
            self.type == 22 or \
-           self.type == 23:
+           self.type == 23 or \
+           self.type == 30 or \
+           self.type == 31 or \
+           self.type == 32 or \
+           self.type == 33 or \
+           self.type == 34 or \
+           self.type == 35 or \
+           self.type == 131 or \
+           self.type == 132 or \
+           self.type == 133:
             return True
         return False
