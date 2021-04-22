@@ -96,6 +96,8 @@ class laurel:
             devices = []
             properties = get_properties(self.auth, mesh['product_id'],
                                         mesh['id'])
+            if properties.get('error') is not None:
+                continue
             for bulb in properties['bulbsArray']:
                 id = int(bulb['deviceID'][-3:])
                 mac = [bulb['mac'][i:i+2] for i in range(0, 12, 2)]
