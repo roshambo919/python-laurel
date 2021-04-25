@@ -22,14 +22,14 @@ import warnings
 
 dynamic_requires = []
 
-version = "0.3"
+version = "0.4"
 
 setup(
     name='laurel',
     version=version,
     author='Matthew Garrett',
-    author_email='mjg59@google.com',
-    url='http://github.com/google/python-laurel',
+    author_email='mjg59@srcf.ucam.org',
+    url='http://github.com/mjg59/python-laurel',
     packages=find_packages(),
     scripts=[],
     description='Python control of C by GE Bluetooth lightbulbs',
