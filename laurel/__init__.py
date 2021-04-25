@@ -133,7 +133,7 @@ class laurel_mesh:
                 self.link = None
                 pass
         if self.link is None:
-            raise Exception("Unable to connect to mesh %s" % self.address)
+            raise(LaurelException("Unable to connect to mesh %s" % self.address))
 
     def send_packet(self, id, command, params):
         self.link.send_packet(id, command, params)
