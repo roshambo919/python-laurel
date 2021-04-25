@@ -22,7 +22,7 @@ import warnings
 
 dynamic_requires = []
 
-version = "0.4"
+version = "0.5"
 
 setup(
     name='laurel',
@@ -41,7 +41,7 @@ setup(
         'Programming Language :: Python',
     ],
     install_requires=[
-        "dimond",
+        "dimond>=0.3",
         "requests",
     ],
     include_package_data=True,
