@@ -99,14 +99,17 @@ class laurel:
             if properties.get('error') is not None:
                 continue
             for bulb in properties['bulbsArray']:
-                id = int(bulb['deviceID'][-3:])
-                mac = [bulb['mac'][i:i+2] for i in range(0, 12, 2)]
-                mac = "%s:%s:%s:%s:%s:%s" % (mac[5], mac[4], mac[3], mac[2], mac[1], mac[0])
-                if network is None:
-                    network = laurel_mesh(mesh['mac'], mesh['access_key'])
-                device = laurel_device(network, {'name': bulb['displayName'], 'mac': mac, 'id': id, 'type': bulb['deviceType'], 'load': bulb['loadSelection'})
-                network.devices.append(device)
-                self.devices.append(device)
+                try:
+                    id = int(bulb['deviceID'][-3:])
+                    mac = [bulb['mac'][i:i+2] for i in range(0, 12, 2)]
+                    mac = "%s:%s:%s:%s:%s:%s" % (mac[5], mac[4], mac[3], mac[2], mac[1], mac[0])
+                    if network is None:
+                        network = laurel_mesh(mesh['mac'], mesh['access_key'])
+                    device = laurel_device(network, {'name': bulb['displayName'], 'mac': mac, 'id': id, 'type': bulb['deviceType'], 'load': bulb['loadSelection']})
+                    network.devices.append(device)
+                    self.devices.append(device)
+                except KeyError:
+                    continue
                 
             self.networks.append(network)
 
