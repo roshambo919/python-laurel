@@ -96,17 +96,20 @@ class laurel:
             devices = []
             properties = get_properties(self.auth, mesh['product_id'],
                                         mesh['id'])
-            for bulb in properties['bulbsArray']:               
-                # id = int(bulb['deviceID'][-3:])
-                id_val = int(bulb['deviceID'])
-                mac = [bulb['mac'][i:i+2] for i in range(0, 12, 2)]
-                mac = "%s:%s:%s:%s:%s:%s" % (mac[5], mac[4], mac[3], mac[2], mac[1], mac[0])
-                if network is None:
-                    network = laurel_mesh(mesh['mac'], mesh['access_key'])
-                device = laurel_device(network, {'name': bulb['displayName'], 'mac': mac, 'id': id_val, 'type': bulb['deviceType']})
-                network.devices.append(device)
-                self.devices.append(device)
-                
+            if properties.get('error') is not None:
+                continue
+            for bulb in properties['bulbsArray']:
+                try:
+                    id = int(bulb['deviceID'][-3:])
+                    mac = [bulb['mac'][i:i+2] for i in range(0, 12, 2)]
+                    mac = "%s:%s:%s:%s:%s:%s" % (mac[5], mac[4], mac[3], mac[2], mac[1], mac[0])
+                    if network is None:
+                        network = laurel_mesh(mesh['mac'], mesh['access_key'])
+                    device = laurel_device(network, {'name': bulb['displayName'], 'mac': mac, 'id': id, 'type': bulb['deviceType'], 'load': bulb['loadSelection']})
+                    network.devices.append(device)
+                    self.devices.append(device)
+                except KeyError:
+                    continue                
             self.networks.append(network)
 
 class laurel_mesh:
@@ -139,14 +142,11 @@ class laurel_mesh:
                 self.link = None
                 pass
         if self.link is None:
-            raise Exception("Unable to connect to mesh %s" % self.address)
-        else:
-            print('Connected to mesh %s' % self.address)
-    def send_packet(self, id_val, command, params):
-        if self.link is None:
-            self.connect()
-        self.link.send_packet(id_val, command, params)
-        # self.link.send_packet(0xffff, command, params)
+            raise(LaurelException("Unable to connect to mesh %s" % self.address))
+
+    def send_packet(self, id, command, params):
+        self.link.send_packet(id, command, params)
+
     def update_status(self):
         self.send_packet(0xffff, 0xda, [])
 
@@ -158,6 +158,7 @@ class laurel_device:
         self.id = device['id']
         self.mac = device['mac']
         self.type = device['type']
+        self.load = device['load']
         self.callback = None
         self.brightness = 0
         self.temperature = 0
@@ -192,14 +193,40 @@ class laurel_device:
     def update_status(self):
         self.network.send_packet(self.id, 0xda, [])
 
+    def supports_dimming(self):
+        if self.supports_temperature() or \
+           self.type == 1 or \
+           self.type == 9 or \
+           self.type == 17 or \
+           self.type == 18 or \
+           self.type == 24 or \
+           self.type == 81:
+            return True
+
+        if self.type == 48 or \
+           self.type == 55 or \
+           self.type == 56:
+            # Switch, depends on load type
+            if self.load == 4 or\
+               self.load == 5:
+                return False
+            return True
+
+        return False
+
     def supports_temperature(self):
         if self.supports_rgb() or \
            self.type == 5 or \
+           self.type == 14 or \
+           self.type == 15 or \
            self.type == 19 or \
            self.type == 20 or \
+           self.type == 28 or \
+           self.type == 29 or \
            self.type == 80 or \
            self.type == 83 or \
-           self.type == 85:
+           self.type == 85 or \
+           self.type == 129:
             return True
         return False
 
@@ -209,6 +236,15 @@ class laurel_device:
            self.type == 8 or \
            self.type == 21 or \
            self.type == 22 or \
-           self.type == 23:
+           self.type == 23 or \
+           self.type == 30 or \
+           self.type == 31 or \
+           self.type == 32 or \
+           self.type == 33 or \
+           self.type == 34 or \
+           self.type == 35 or \
+           self.type == 131 or \
+           self.type == 132 or \
+           self.type == 133:
             return True
         return False
