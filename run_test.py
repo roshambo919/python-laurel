@@ -33,3 +33,6 @@ devices[idx].network.connect(idx_start = idx)
 
 print('Setting brightness')
 devices[idx].set_brightness(10)
+
+print('Setting power')
+devices[idx].set_power(False)

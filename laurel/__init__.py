@@ -98,12 +98,12 @@ class laurel:
                                         mesh['id'])
             for bulb in properties['bulbsArray']:               
                 # id = int(bulb['deviceID'][-3:])
-                id = int(bulb['deviceID'])
+                id_val = int(bulb['deviceID'])
                 mac = [bulb['mac'][i:i+2] for i in range(0, 12, 2)]
                 mac = "%s:%s:%s:%s:%s:%s" % (mac[5], mac[4], mac[3], mac[2], mac[1], mac[0])
                 if network is None:
                     network = laurel_mesh(mesh['mac'], mesh['access_key'])
-                device = laurel_device(network, {'name': bulb['displayName'], 'mac': mac, 'id': id, 'type': bulb['deviceType']})
+                device = laurel_device(network, {'name': bulb['displayName'], 'mac': mac, 'id': id_val, 'type': bulb['deviceType']})
                 network.devices.append(device)
                 self.devices.append(device)
                 
@@ -142,11 +142,11 @@ class laurel_mesh:
             raise Exception("Unable to connect to mesh %s" % self.address)
         else:
             print('Connected to mesh %s' % self.address)
-    def send_packet(self, id, command, params):
+    def send_packet(self, id_val, command, params):
         if self.link is None:
             self.connect()
-        self.link.send_packet(id, command, params)
-
+        self.link.send_packet(id_val, command, params)
+        # self.link.send_packet(0xffff, command, params)
     def update_status(self):
         self.send_packet(0xffff, 0xda, [])
 
